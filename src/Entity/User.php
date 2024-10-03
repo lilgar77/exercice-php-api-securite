@@ -10,7 +10,22 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 
-#[ApiResource]
+/**
+ * @ApiResource(
+ *     collectionOperations={
+ *         "get"={"method"="GET", "path"="/users"},
+ *         "post"={"method"="POST", "path"="/users"}
+ *     },
+ *     itemOperations={
+ *         "get"={"method"="GET", "path"="/users/{id}"},
+ *         "put"={"method"="PUT", "path"="/users/{id}"},
+ *         "delete"={"method"="DELETE", "path"="/users/{id}"}
+ *     },
+ *     attributes={
+ *         "pagination_enabled"=false
+ *     }
+ * )
+ */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
