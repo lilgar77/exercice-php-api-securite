@@ -37,7 +37,7 @@ class Project
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
-        $this->createdAt = new \DateTime(); // Initialisation de la date de création
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int

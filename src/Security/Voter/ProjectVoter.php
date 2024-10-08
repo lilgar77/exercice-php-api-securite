@@ -38,7 +38,6 @@ final class ProjectVoter extends Voter
             return false;
         }
 
-        // Get the user's roles in the company (assumes a method to retrieve user roles)
         $userRoles = $this->getUserRolesInCompany($user, $subject->getCompany());
 
         switch ($attribute) {
@@ -60,8 +59,6 @@ final class ProjectVoter extends Voter
 
     private function getUserRolesInCompany(UserInterface $user, $company): array
     {
-        // Implement logic to retrieve user roles in the specified company
-        // For example, you might have a repository method that fetches this data
         return []; // Return an array of roles (e.g., ['admin', 'manager'])
     }
 }
