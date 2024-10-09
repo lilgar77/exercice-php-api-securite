@@ -16,19 +16,33 @@ class UserController extends AbstractController
     public function getUsers(UserRepository $userRepository): Response
     {
         $users = $userRepository->findAll();
-        return $this->json($users);
+
+        // Sérialiser les utilisateurs sans références circulaires
+        $data = [];
+        foreach ($users as $user) {
+            $data[] = [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                // Vous pouvez ajouter d'autres propriétés si nécessaire
+            ];
+        }
+
+        return $this->json($data);
     }
 
     #[Route('/api/users/{id}', name: 'get_user', methods: ['GET'])]
-    public function getUserById(User $user): Response // Renommé ici
+    public function getUserById(User $user): Response
     {
-        return $this->json($user);
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            // Vous pouvez ajouter d'autres propriétés si nécessaire
+        ]);
     }
 
     #[Route('/api/users', name: 'create_user', methods: ['POST'])]
     public function createUser(Request $request, EntityManagerInterface $em): Response
     {
-        // Check access rights (only admins can add users)
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Access Denied'], 403);
         }
@@ -42,13 +56,16 @@ class UserController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        return $this->json($user, 201); // Return the user with a 201 Created status
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            // Autres propriétés
+        ], 201);
     }
 
     #[Route('/api/users/{id}', name: 'update_user', methods: ['PUT'])]
     public function updateUser(Request $request, User $user, EntityManagerInterface $em): Response
     {
-        // Check access rights (only admins can modify users)
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Access Denied'], 403);
         }
@@ -58,13 +75,16 @@ class UserController extends AbstractController
 
         $em->flush();
 
-        return $this->json($user);
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            // Autres propriétés
+        ]);
     }
 
     #[Route('/api/users/{id}', name: 'delete_user', methods: ['DELETE'])]
     public function deleteUser(User $user, EntityManagerInterface $em): Response
     {
-        // Check access rights (only admins can delete users)
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->json(['error' => 'Access Denied'], 403);
         }
@@ -72,6 +92,6 @@ class UserController extends AbstractController
         $em->remove($user);
         $em->flush();
 
-        return $this->json(null, 204); // Return a 204 No Content response
+        return $this->json(null, 204);
     }
 }
