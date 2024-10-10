@@ -49,7 +49,6 @@ class UserApiTest extends ApiTestCase
     public function testCreateUser(): void
     {
         $client = static::createClient();
-
         $response = $client->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',
@@ -60,28 +59,33 @@ class UserApiTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $token = $data['token'];
 
+        $uniqueEmail = 'newuser' . uniqid() . '@local.host';
+
         $response = $client->request('POST', '/api/users', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
             ],
             'json' => [
-                'email' => 'newuser' . time() . '@local.host',
+                'email' => $uniqueEmail,
                 'password' => 'newpassword123',
             ],
         ]);
 
+        // Vérifier que l'utilisateur a été créé avec succès
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($response->getContent(), true);
 
+        // Vérifier que la réponse contient les données de l'utilisateur créé
         $this->assertArrayHasKey('id', $data);
-        $this->assertEquals('newuser' . time() . '@local.host', $data['email']);
+        $this->assertEquals($uniqueEmail, $data['email']);
     }
+
 
     public function testGetUserById(): void
     {
         $client = static::createClient();
 
-        $userId = 4;
+        $userId = 88;
         $response = $client->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Company;
+use App\Entity\User;
+
 use App\Repository\CompanyRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,9 +17,8 @@ class CompanyController extends AbstractController
     #[Route('/api/companies', name: 'get_companies', methods: ['GET'])]
     public function getCompanies(CompanyRepository $companyRepository): Response
     {
-        // Ideally, you would filter companies based on the user's associated roles
-        $user = $this->getUser(); // Get the current authenticated user
-        $companies = $user->getCompanies(); // Assuming you have a method to get associated companies
+        $user = $this->getUser();
+        $companies = $user->getCompanies();
         return $this->json($companies);
     }
 
