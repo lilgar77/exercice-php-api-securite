@@ -17,13 +17,11 @@ class UserController extends AbstractController
     {
         $users = $userRepository->findAll();
 
-        // Sérialiser les utilisateurs sans références circulaires
         $data = [];
         foreach ($users as $user) {
             $data[] = [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
-                // Vous pouvez ajouter d'autres propriétés si nécessaire
             ];
         }
 
@@ -36,7 +34,6 @@ class UserController extends AbstractController
         return $this->json([
             'id' => $user->getId(),
             'email' => $user->getEmail(),
-            // Vous pouvez ajouter d'autres propriétés si nécessaire
         ]);
     }
 
@@ -78,7 +75,6 @@ class UserController extends AbstractController
         return $this->json([
             'id' => $user->getId(),
             'email' => $user->getEmail(),
-            // Autres propriétés
         ]);
     }
 
@@ -94,4 +90,6 @@ class UserController extends AbstractController
 
         return $this->json(null, 204);
     }
+
+
 }
