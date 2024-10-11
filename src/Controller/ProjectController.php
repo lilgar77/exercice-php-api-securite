@@ -35,11 +35,13 @@ class ProjectController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+        // Create a new project
         $project = new Project();
         $project->setTitle($data['title']);
         $project->setDescription($data['description']);
         $project->setCreatedAt(new \DateTime()); // Set creation date
 
+        // Save the project
         $em->persist($project);
         $em->flush();
 
@@ -54,6 +56,7 @@ class ProjectController extends AbstractController
             return $this->json(['error' => 'Access Denied'], 403);
         }
 
+        // Update the project
         $data = json_decode($request->getContent(), true);
         $project->setTitle($data['title'] ?? $project->getTitle());
         $project->setDescription($data['description'] ?? $project->getDescription());
@@ -71,6 +74,7 @@ class ProjectController extends AbstractController
             return $this->json(['error' => 'Access Denied'], 403);
         }
 
+        // Delete the project
         $em->remove($project);
         $em->flush();
 

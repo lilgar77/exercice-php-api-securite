@@ -37,12 +37,12 @@ class CompanyController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
-
+        // Create a new company
         $company = new Company();
         $company->setName($data['name']);
         $company->setSiret($data['siret']);
         $company->setAddress($data['address']);
-
+        // Save the company
         $em->persist($company);
         $em->flush();
 
@@ -57,6 +57,7 @@ class CompanyController extends AbstractController
             return $this->json(['error' => 'Access Denied'], 403);
         }
 
+        // Update the company
         $data = json_decode($request->getContent(), true);
         $company->setName($data['name'] ?? $company->getName());
         $company->setSiret($data['siret'] ?? $company->getSiret());
@@ -75,6 +76,7 @@ class CompanyController extends AbstractController
             return $this->json(['error' => 'Access Denied'], 403);
         }
 
+        // Delete the company
         $em->remove($company);
         $em->flush();
 

@@ -7,9 +7,36 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            normalizationContext: ['groups' => ['company:read']],
+            security: 'is_granted("ROLE_USER")'
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['company:write']],
+            security: 'is_granted("ROLE_ADMIN")'
+        ),
+        new Put(
+            denormalizationContext: ['groups' => ['company:write']],
+            security: 'is_granted("ROLE_ADMIN")'
+        ),
+        new Delete(
+            security: 'is_granted("ROLE_ADMIN")'
+        ),
+    ],
+    paginationEnabled: true,
+    paginationItemsPerPage: 10,
+    normalizationContext: ['groups' => ['company:read']],
+    denormalizationContext: ['groups' => ['company:write']]
+)]
 class Company
 {
     #[ORM\Id]
@@ -37,6 +64,8 @@ class Company
         $this->userRoles = new ArrayCollection();
         $this->projects = new ArrayCollection();
     }
+
+    // Getters and setters
 
     public function getId(): ?int
     {

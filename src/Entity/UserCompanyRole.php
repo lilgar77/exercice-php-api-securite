@@ -5,11 +5,32 @@ namespace App\Entity;
 use App\Repository\UserCompanyRoleRepository;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
-use App\Entity\User;
-use App\Entity\Company;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
 
 #[ORM\Entity(repositoryClass: UserCompanyRoleRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            security: 'is_granted("ROLE_ADMIN")',
+            normalizationContext: ['groups' => ['user_company_role:read']]
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['user_company_role:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Put(
+            denormalizationContext: ['groups' => ['user_company_role:write']],
+            security: 'is_granted("ROLE_ADMIN")'
+        ),
+        new Delete(
+            security: 'is_granted("ROLE_ADMIN")'
+        )
+    ],
+    paginationEnabled: false
+)]
 class UserCompanyRole
 {
     #[ORM\Id]
@@ -27,6 +48,8 @@ class UserCompanyRole
 
     #[ORM\Column(length: 50)]
     private ?string $role = null;
+
+    // Getters and setters
 
     public function getId(): ?int
     {

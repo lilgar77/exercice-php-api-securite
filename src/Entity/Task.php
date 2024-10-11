@@ -5,9 +5,37 @@ namespace App\Entity;
 use App\Repository\TaskRepository;
 use Doctrine\DBAL\Types\Types; // Make sure this is included
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            normalizationContext: ['groups' => ['task:read']],
+            security: 'is_granted("ROLE_USER")'
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['task:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Put(
+            denormalizationContext: ['groups' => ['task:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Delete(
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        )
+    ],
+    paginationEnabled: true,
+    paginationItemsPerPage: 10,
+    normalizationContext: ['groups' => ['task:read']],
+    denormalizationContext: ['groups' => ['task:write']]
+)]
 class Task
 {
     #[ORM\Id]
@@ -18,7 +46,7 @@ class Task
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[ORM\Column(type: Types::TEXT)] // Adjust as necessary
+    #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -27,6 +55,8 @@ class Task
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Project $project = null;
+
+    // Getters and setters
 
     public function getId(): ?int
     {

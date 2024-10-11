@@ -8,6 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 class ProjectApiTest extends ApiTestCase
 {
 
+    /**
+     * Test the GET /api/projects endpoint
+     */
     public function testGetProjects(): void
     {
         $client = static::createClient();
@@ -32,7 +35,6 @@ class ProjectApiTest extends ApiTestCase
             ],
         ]);
 
-        // Assert the response status code is 200 OK
         $this->assertResponseIsSuccessful();
 
         // Assert that the response contains projects
@@ -40,6 +42,9 @@ class ProjectApiTest extends ApiTestCase
         $this->assertNotEmpty($content['member']);
     }
 
+    /**
+     * Test the POST /api/projects endpoint
+     */
     public function testCreateAndDeleteProject(): void
     {
         $client = static::createClient();
@@ -47,8 +52,8 @@ class ProjectApiTest extends ApiTestCase
         // Authenticate the user to create a project
         $response = $client->request('POST', '/api/auth', [
             'json' => [
-                'email' => 'admin@local.host', // Replace with a valid user
-                'password' => 'admin_password', // Replace with a valid password
+                'email' => 'admin@local.host',
+                'password' => 'admin_password',
             ],
         ]);
 
@@ -67,8 +72,8 @@ class ProjectApiTest extends ApiTestCase
         $response = $client->request('POST', '/api/projects', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
-                'Accept' => 'application/ld+json', // Ensure the correct content type is specified
-                'Content-Type' => 'application/ld+json' // Specify the content type for the request
+                'Accept' => 'application/ld+json',
+                'Content-Type' => 'application/ld+json'
             ],
             'json' => $projectData,
         ]);
@@ -78,8 +83,8 @@ class ProjectApiTest extends ApiTestCase
 
         // Assert that the response contains the new project data
         $content = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $content); // Check for project ID
-        $this->assertEquals('New Project', $content['title']); // Check the title
+        $this->assertArrayHasKey('id', $content);
+        $this->assertEquals('New Project', $content['title']);
 
         // Now delete the created project
         $projectId = $content['id'];
@@ -94,6 +99,9 @@ class ProjectApiTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(204); // No Content
     }
 
+    /**
+     * Test the PUT /api/projects/{id} endpoint
+     */
     public function testUpdateProject(): void
     {
         $client = static::createClient();
@@ -108,6 +116,7 @@ class ProjectApiTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $token = $data['token'] ?? '';
 
+        // Create a new project
         $client->request('POST', '/api/projects', [
             'headers' => ['Authorization' => 'Bearer ' . $token],
             'json' => [

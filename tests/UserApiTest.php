@@ -5,12 +5,14 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 class UserApiTest extends ApiTestCase
 {
+    /**
+     * Authenticate a user and return the JWT token
+     */
     private function authenticate(): string
     {
-        // Create the client to make requests
         $client = static::createClient();
 
-        // Make a POST request to /api/auth to get the JWT token
+        // Make a POST request to get the JWT token
         $response = $client->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',
@@ -25,11 +27,15 @@ class UserApiTest extends ApiTestCase
         return $data['token'];
     }
 
+    /**
+     * Test the GET /api/users endpoint
+     */
     public function testGetUsers(): void
     {
         $client = static::createClient();
         $token = $this->authenticate();
 
+        // Make a GET request to get the list of users
         $response = $client->request('GET', '/api/users', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -39,6 +45,7 @@ class UserApiTest extends ApiTestCase
         $this->assertResponseIsSuccessful();
         $this->assertNotEmpty($response->getContent());
 
+        // Assert that the response contains the expected data
         $data = json_decode($response->getContent(), true);
         foreach ($data as $user) {
             $this->assertArrayHasKey('id', $user);
@@ -46,6 +53,9 @@ class UserApiTest extends ApiTestCase
         }
     }
 
+    /**
+     * Test the POST /api/users endpoint
+     */
     public function testCreateUser(): void
     {
         $client = static::createClient();
@@ -71,21 +81,24 @@ class UserApiTest extends ApiTestCase
             ],
         ]);
 
-        // Vérifier que l'utilisateur a été créé avec succès
+        // Verificate that the response is successful
         $this->assertResponseStatusCodeSame(201);
         $data = json_decode($response->getContent(), true);
 
-        // Vérifier que la réponse contient les données de l'utilisateur créé
+        // Verificate that the response contains the expected data
         $this->assertArrayHasKey('id', $data);
         $this->assertEquals($uniqueEmail, $data['email']);
     }
 
 
+    /**
+     * Test the GET /api/users/{id} endpoint
+     */
     public function testGetUserById(): void
     {
         $client = static::createClient();
 
-        $userId = 88;
+        $userId = 88; //id of the user to get
         $response = $client->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',
@@ -93,6 +106,8 @@ class UserApiTest extends ApiTestCase
             ],
         ]);
 
+
+        // Get the token
         $data = json_decode($response->getContent(), true);
         $token = $data['token'];
 
@@ -108,16 +123,20 @@ class UserApiTest extends ApiTestCase
 
         $data = json_decode($response->getContent(), true);
 
+        // Assert that the response contains the expected data
         $this->assertArrayHasKey('id', $data);
         $this->assertArrayHasKey('email', $data);
         $this->assertEquals($userId, $data['id']);
     }
 
+    /**
+     * Test the DELETE /api/users/{id} endpoint
+     */
     public function testDeleteUser(): void
     {
         $client = static::createClient();
 
-        // Obtenir un token JWT
+        // Authenticate the user
         $response = $client->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',
@@ -128,6 +147,7 @@ class UserApiTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $token = $data['token'];
 
+        // Create a new user
         $response = $client->request('POST', '/api/users', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -138,10 +158,12 @@ class UserApiTest extends ApiTestCase
             ],
         ]);
 
+        // Verificate that the response is successful
         $this->assertResponseStatusCodeSame(201);
         $userData = json_decode($response->getContent(), true);
         $userId = $userData['id'];
 
+        // Delete the user
         $response = $client->request('DELETE', '/api/users/' . $userId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -150,6 +172,7 @@ class UserApiTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(204);
 
+        // Check that the user has been deleted
         $response = $client->request('GET', '/api/users/' . $userId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -159,10 +182,14 @@ class UserApiTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
+    /**
+     * Test the PUT /api/users/{id} endpoint
+     */
     public function testUpdateUser(): void
     {
         $client = static::createClient();
 
+        // Authenticate the user
         $response = $client->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',
@@ -173,6 +200,7 @@ class UserApiTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $token = $data['token'];
 
+        // Create a new user
         $response = $client->request('POST', '/api/users', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -183,10 +211,12 @@ class UserApiTest extends ApiTestCase
             ],
         ]);
 
+        // Verificate that the response is successful
         $this->assertResponseStatusCodeSame(201);
         $userData = json_decode($response->getContent(), true);
         $userId = $userData['id']; // Récupérer l'ID de l'utilisateur créé
 
+        // Update the user
         $response = $client->request('PUT', '/api/users/' . $userId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -198,6 +228,7 @@ class UserApiTest extends ApiTestCase
 
         $this->assertResponseIsSuccessful();
 
+        // Check that the user has been updated
         $data = json_decode($response->getContent(), true);
         $this->assertArrayHasKey('id', $data);
         $this->assertEquals($userId, $data['id']);

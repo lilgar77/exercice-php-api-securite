@@ -8,9 +8,36 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(
+            normalizationContext: ['groups' => ['project:read']],
+            security: 'is_granted("ROLE_USER")'
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['project:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Put(
+            denormalizationContext: ['groups' => ['project:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Delete(
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        )
+    ],
+    paginationEnabled: true,
+    paginationItemsPerPage: 10,
+    normalizationContext: ['groups' => ['project:read']],
+    denormalizationContext: ['groups' => ['project:write']]
+)]
 class Project
 {
     #[ORM\Id]
@@ -39,6 +66,8 @@ class Project
         $this->tasks = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
+
+    // Getters and setters
 
     public function getId(): ?int
     {

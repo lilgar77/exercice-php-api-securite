@@ -7,9 +7,11 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 class CompanyApiTest extends ApiTestCase
 {
+    /**
+     * Test the GET /api/companies endpoint
+     */
     public function testGetCompanies(): void
     {
-        // Create a client to make requests
         $client = static::createClient();
 
         // Request a JWT token for authentication
@@ -54,9 +56,11 @@ class CompanyApiTest extends ApiTestCase
         }
     }
 
+    /**
+     * Test the GET /api/companies/{id} endpoint
+     */
     public function testGetCompanyById(): void
     {
-        // Create a client to make requests
         $client = static::createClient();
 
         // Request a JWT token for authentication
@@ -84,8 +88,6 @@ class CompanyApiTest extends ApiTestCase
 
         // Validate the response
         $this->assertResponseIsSuccessful();
-
-        // Decode the response content
         $companyData = json_decode($response->getContent(), true);
 
         // Assert that the response contains the correct company details
@@ -96,9 +98,11 @@ class CompanyApiTest extends ApiTestCase
         $this->assertArrayHasKey('address', $companyData, 'The company should have an address.');
     }
 
+    /**
+     * Test the POST /api/companies and DELETE /api/companies/{id} endpoints
+     */
     public function testCreateAndDeleteCompany(): void
     {
-        // Obtenir un jeton JWT en se connectant avec un utilisateur admin
         $client = static::createClient();
         $response = $client->request('POST', '/api/auth', [
             'json' => [
@@ -110,7 +114,8 @@ class CompanyApiTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $token = $data['token'];
 
-        // Effectuer la requête de création de société
+
+        // Create a new company
         $response = $client->request('POST', '/api/companies', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -134,6 +139,7 @@ class CompanyApiTest extends ApiTestCase
         $this->assertEquals('98765432109876', $data['siret']);
         $this->assertEquals('456 Temporary Address', $data['address']);
 
+        // Delete the company
         $response = $client->request('DELETE', '/api/companies/' . $companyId, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -144,9 +150,11 @@ class CompanyApiTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(204);
     }
 
+    /**
+     * Test the PUT /api/companies/{id} endpoint
+     */
     public function testUpdateCompany(): void
     {
-        // Obtenir un jeton JWT en se connectant avec un utilisateur admin
         $client = static::createClient();
         $response = $client->request('POST', '/api/auth', [
             'json' => [
@@ -158,6 +166,7 @@ class CompanyApiTest extends ApiTestCase
         $data = json_decode($response->getContent(), true);
         $token = $data['token'];
 
+        // Update the company with ID 11
         $response = $client->request('PUT', '/api/companies/11', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -172,6 +181,7 @@ class CompanyApiTest extends ApiTestCase
         $this->assertResponseIsSuccessful();
         $data = json_decode($response->getContent(), true);
 
+        // Assert that the company was updated successfully
         $this->assertArrayHasKey('id', $data);
         $this->assertEquals('Updated Company Name', $data['name']);
         $this->assertEquals('98765432101234', $data['siret']);

@@ -35,6 +35,7 @@ class TaskController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+        // Create a new task
         $task = new Task();
         $task->setTitle($data['title']);
         $task->setDescription($data['description']);

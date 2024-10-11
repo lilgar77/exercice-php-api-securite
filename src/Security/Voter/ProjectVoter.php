@@ -40,6 +40,7 @@ final class ProjectVoter extends Voter
 
         $userRoles = $this->getUserRolesInCompany($user, $subject->getCompany());
 
+        // Check if the user has the required role
         switch ($attribute) {
             case self::CREATE:
                 return in_array('admin', $userRoles) || in_array('manager', $userRoles);
@@ -59,6 +60,6 @@ final class ProjectVoter extends Voter
 
     private function getUserRolesInCompany(UserInterface $user, $company): array
     {
-        return []; // Return an array of roles (e.g., ['admin', 'manager'])
+        return []; // Return an array of roles
     }
 }

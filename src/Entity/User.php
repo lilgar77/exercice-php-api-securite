@@ -8,26 +8,35 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 
-/**
- * @ApiResource(
- *     collectionOperations={
- *         "get"={"method"="GET", "path"="/users"},
- *         "post"={"method"="POST", "path"="/users"}
- *     },
- *     itemOperations={
- *         "get"={"method"="GET", "path"="/users/{id}"},
- *         "put"={"method"="PUT", "path"="/users/{id}"},
- *         "delete"={"method"="DELETE", "path"="/users/{id}"}
- *     },
- *     attributes={
- *         "pagination_enabled"=false
- *     }
- * )
- */
+#[ApiResource(
+    operations: [
+        new Get(
+            security: 'is_granted("ROLE_ADMIN")',
+            normalizationContext: ['groups' => ['user:read']]
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['user:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Put(
+            denormalizationContext: ['groups' => ['user:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Delete(
+            security: 'is_granted("ROLE_ADMIN")'
+        )
+    ],
+    paginationEnabled: false
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -55,8 +64,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->userRoles = new ArrayCollection(); // Initialiser la collection
+        $this->userRoles = new ArrayCollection();
     }
+
+    // Getters and setters
 
     public function getId(): ?int
     {
