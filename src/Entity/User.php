@@ -3,12 +3,40 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+
+#[ApiResource(
+    operations: [
+        new Get(
+            security: 'is_granted("ROLE_ADMIN")',
+            normalizationContext: ['groups' => ['user:read']]
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['user:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Put(
+            denormalizationContext: ['groups' => ['user:write']],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+        ),
+        new Delete(
+            security: 'is_granted("ROLE_ADMIN")'
+        )
+    ],
+    paginationEnabled: false
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -30,6 +58,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserCompanyRole::class, orphanRemoval: true)]
+    private Collection $userRoles;
+
+    public function __construct()
+    {
+        $this->userRoles = new ArrayCollection();
+    }
+
+    // Getters and setters
 
     public function getId(): ?int
     {
@@ -104,5 +142,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, UserCompanyRole>
+     */
+    public function getUserRoles(): Collection
+    {
+        return $this->userRoles;
+    }
+
+    public function addUserRole(UserCompanyRole $userRole): static
+    {
+        if (!$this->userRoles->contains($userRole)) {
+            $this->userRoles->add($userRole);
+            $userRole->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRole(UserCompanyRole $userRole): static
+    {
+        if ($this->userRoles->removeElement($userRole)) {
+            // Set the owning side to null (unless already changed)
+            if ($userRole->getUser() === $this) {
+                $userRole->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
