@@ -1,22 +1,22 @@
 <?php
 namespace App\Security\Voter;
 
-use App\Entity\Project;
+use App\Entity\Task;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final class ProjectVoter extends Voter
+final class TaskVoter extends Voter
 {
-    public const EDIT = 'PROJECT_EDIT';
-    public const VIEW = 'PROJECT_VIEW';
-    public const CREATE = 'PROJECT_CREATE';
-    public const DELETE = 'PROJECT_DELETE';
+    public const EDIT = 'TASK_EDIT';
+    public const VIEW = 'TASK_VIEW';
+    public const CREATE = 'TASK_CREATE';
+    public const DELETE = 'TASK_DELETE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         return in_array($attribute, [self::EDIT, self::VIEW, self::CREATE, self::DELETE])
-            && $subject instanceof Project;
+            && $subject instanceof Task;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool

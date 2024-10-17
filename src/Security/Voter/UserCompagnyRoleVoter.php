@@ -1,22 +1,22 @@
 <?php
 namespace App\Security\Voter;
 
-use App\Entity\Project;
+use App\Entity\UserCompanyRole;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final class ProjectVoter extends Voter
+final class UserCompagnyRoleVoter extends Voter
 {
-    public const EDIT = 'PROJECT_EDIT';
-    public const VIEW = 'PROJECT_VIEW';
-    public const CREATE = 'PROJECT_CREATE';
-    public const DELETE = 'PROJECT_DELETE';
+    public const EDIT = 'USER_ROLE_EDIT';
+    public const VIEW = 'USER_ROLE_VIEW';
+    public const CREATE = 'USER_ROLE_CREATE';
+    public const DELETE = 'USER_ROLE_DELETE';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         return in_array($attribute, [self::EDIT, self::VIEW, self::CREATE, self::DELETE])
-            && $subject instanceof Project;
+            && $subject instanceof UserCompanyRole;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -31,16 +31,16 @@ final class ProjectVoter extends Voter
 
         switch ($attribute) {
             case self::CREATE:
-                return in_array('admin', $userRoles) || in_array('manager', $userRoles);
+                return in_array('admin', $userRoles);
 
             case self::EDIT:
-                return in_array('admin', $userRoles) || in_array('manager', $userRoles);
+                return in_array('admin', $userRoles);
 
             case self::DELETE:
                 return in_array('admin', $userRoles);
 
             case self::VIEW:
-                return in_array('admin', $userRoles) || in_array('manager', $userRoles) || in_array('consultant', $userRoles);
+                return in_array('admin', $userRoles) || in_array('manager', $userRoles);
         }
 
         return false;
