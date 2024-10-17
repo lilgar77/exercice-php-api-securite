@@ -18,12 +18,12 @@ use ApiPlatform\Metadata\Delete;
             normalizationContext: ['groups' => ['user_company_role:read']]
         ),
         new Post(
-            denormalizationContext: ['groups' => ['user_company_role:write']],
-            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")',
+            denormalizationContext: ['groups' => ['user_company_role:write']]
         ),
         new Put(
-            denormalizationContext: ['groups' => ['user_company_role:write']],
-            security: 'is_granted("ROLE_ADMIN")'
+            security: 'is_granted("ROLE_ADMIN")',
+            denormalizationContext: ['groups' => ['user_company_role:write']]
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN")'
