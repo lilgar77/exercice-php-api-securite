@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 
@@ -16,16 +17,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new Get(
-            normalizationContext: ['groups' => ['task:read']],
-            security: 'is_granted("ROLE_USER")'
+            security: 'is_granted("ROLE_USER")',
+            normalizationContext: ['groups' => ['task:read']]
         ),
         new Post(
-            denormalizationContext: ['groups' => ['task:write']],
-            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")',
+            denormalizationContext: ['groups' => ['task:write']]
         ),
         new Put(
-            denormalizationContext: ['groups' => ['task:write']],
-            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")',
+            denormalizationContext: ['groups' => ['task:write']]
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
