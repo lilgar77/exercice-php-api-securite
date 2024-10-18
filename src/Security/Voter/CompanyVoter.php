@@ -14,9 +14,12 @@ final class CompanyVoter extends Voter
     public const EDIT = 'COMPANY_EDIT';
     public const DELETE = 'COMPANY_DELETE';
 
+    private const ROLE_ADMIN = 'ROLE_ADMIN';
+    private const ROLE_MANAGER = 'ROLE_MANAGER';
+    private const ROLE_CONSULTANT = 'ROLE_CONSULTANT';
+
     protected function supports(string $attribute, mixed $subject): bool
     {
-        // Vérifie si l'attribut est supporté et si le sujet est une Company
         return in_array($attribute, [self::VIEW, self::CREATE, self::EDIT, self::DELETE])
             && $subject instanceof Company;
     }
@@ -25,26 +28,27 @@ final class CompanyVoter extends Voter
     {
         $user = $token->getUser();
 
-        // Si l'utilisateur est anonyme, refuse l'accès
         if (!$user instanceof UserInterface) {
             return false;
         }
 
-        // On suppose que l'utilisateur a un moyen d'obtenir ses rôles dans la société
+        // Récupère les rôles de l'utilisateur dans la société
         $userRoles = $this->getUserRolesInCompany($user, $subject);
 
         switch ($attribute) {
             case self::CREATE:
-                return in_array('admin', $userRoles);
+                return in_array(self::ROLE_ADMIN, $userRoles);
 
             case self::EDIT:
-                return in_array('admin', $userRoles);
+                return in_array(self::ROLE_ADMIN, $userRoles);
 
             case self::DELETE:
-                return in_array('admin', $userRoles);
+                return in_array(self::ROLE_ADMIN, $userRoles);
 
             case self::VIEW:
-                return in_array('admin', $userRoles) || in_array('manager', $userRoles) || in_array('consultant', $userRoles);
+                return in_array(self::ROLE_ADMIN, $userRoles) ||
+                    in_array(self::ROLE_MANAGER, $userRoles) ||
+                    in_array(self::ROLE_CONSULTANT, $userRoles);
         }
 
         return false;
@@ -52,6 +56,15 @@ final class CompanyVoter extends Voter
 
     private function getUserRolesInCompany(UserInterface $user, Company $company): array
     {
-        return []; // Retourne un tableau de rôles
+        $role = $company->getUserRoles()->filter(function ($userRole) use ($user) {
+            return $userRole->getUser() === $user;
+        })->first();
+
+        if ($role) {
+            dump($role->getRole());
+            return [$role->getRole()];
+        }
+
+        return [];
     }
 }
