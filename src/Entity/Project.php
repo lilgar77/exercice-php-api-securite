@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
@@ -43,22 +44,50 @@ class Project
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read', 'project:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Groups(['company:write', 'project:write', 'project:read'])]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => 'My Awesome Project'
+        ]
+    )]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Groups(['company:write', 'project:write', 'project:read'])]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => 'This is a detailed description of the project'
+        ]
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['project:read'])]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '2024-10-17T14:00:00+00:00'
+        ]
+    )]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['project:read', 'project:write'])]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/companies/1'
+        ]
+    )]
     private ?Company $company = null;
 
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: Task::class, orphanRemoval: true)]
+    #[Groups(['project:read'])]
     private Collection $tasks;
 
     public function __construct()
@@ -142,12 +171,7 @@ class Project
 
     public function removeTask(Task $task): static
     {
-        if ($this->tasks->removeElement($task)) {
-            // set the owning side to null (unless already changed)
-            if ($task->getProject() === $this) {
-                $task->setProject(null);
-            }
-        }
+        $this->tasks->removeElement($task);
 
         return $this;
     }

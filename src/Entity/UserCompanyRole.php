@@ -40,10 +40,20 @@ class UserCompanyRole
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'userRoles')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/users/1'
+        ]
+    )]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: 'userRoles')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/companies/1'
+        ]
+    )]
     private ?Company $company = null;
 
     #[ORM\Column(length: 50)]

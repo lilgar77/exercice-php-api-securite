@@ -48,7 +48,6 @@ final class UserCompagnyRoleVoter extends Voter
 
     private function getUserRolesInCompany(UserInterface $user, $company): array
     {
-        // Remplacez ceci par votre méthode réelle de récupération des rôles
         $roles = [];
         foreach ($user->getUserCompanyRoles() as $userCompanyRole) {
             if ($userCompanyRole->getCompany() === $company) {

@@ -17,7 +17,6 @@ final class UserVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        // Check if the attribute is supported and if the subject is a User
         return in_array($attribute, [self::EDIT, self::VIEW, self::CREATE, self::DELETE])
             && $subject instanceof User;
     }
@@ -31,7 +30,6 @@ final class UserVoter extends Voter
             return false;
         }
 
-        // Check if the user has the required role
         switch ($attribute) {
             case self::CREATE:
                 return in_array('admin', $user->getRoles());

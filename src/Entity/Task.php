@@ -45,16 +45,36 @@ class Task
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => ' New Title Task'
+        ]
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => 'New Description Task'
+        ]
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '2021-10-10T00:00:00+00:00'
+        ]
+    )]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/projects/1'
+        ]
+    )]
     private ?Project $project = null;
 
     // Getters and setters

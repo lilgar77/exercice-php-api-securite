@@ -32,7 +32,6 @@ final class CompanyVoter extends Voter
             return false;
         }
 
-        // Récupère les rôles de l'utilisateur dans la société
         $userRoles = $this->getUserRolesInCompany($user, $subject);
 
         switch ($attribute) {
