@@ -29,9 +29,7 @@ security:
             jwt: ~
 
     access_control:
-        # Permet l'accès à la route de connexion
         - { path: ^/api/auth, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        # Protège toutes les autres routes /api/ pour les utilisateurs authentifiés
         - { path: ^/api/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

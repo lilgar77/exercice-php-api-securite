@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 
@@ -16,16 +17,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations: [
         new Get(
-            normalizationContext: ['groups' => ['task:read']],
-            security: 'is_granted("ROLE_USER")'
+            security: 'is_granted("ROLE_USER")',
+            normalizationContext: ['groups' => ['task:read']]
         ),
         new Post(
-            denormalizationContext: ['groups' => ['task:write']],
-            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")',
+            denormalizationContext: ['groups' => ['task:write']]
         ),
         new Put(
-            denormalizationContext: ['groups' => ['task:write']],
-            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")',
+            denormalizationContext: ['groups' => ['task:write']]
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
@@ -44,16 +45,36 @@ class Task
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => ' New Title Task'
+        ]
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => 'New Description Task'
+        ]
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '2021-10-10T00:00:00+00:00'
+        ]
+    )]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/projects/1'
+        ]
+    )]
     private ?Project $project = null;
 
     // Getters and setters

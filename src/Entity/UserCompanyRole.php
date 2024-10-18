@@ -18,12 +18,12 @@ use ApiPlatform\Metadata\Delete;
             normalizationContext: ['groups' => ['user_company_role:read']]
         ),
         new Post(
-            denormalizationContext: ['groups' => ['user_company_role:write']],
-            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+            security: 'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")',
+            denormalizationContext: ['groups' => ['user_company_role:write']]
         ),
         new Put(
-            denormalizationContext: ['groups' => ['user_company_role:write']],
-            security: 'is_granted("ROLE_ADMIN")'
+            security: 'is_granted("ROLE_ADMIN")',
+            denormalizationContext: ['groups' => ['user_company_role:write']]
         ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN")'
@@ -40,10 +40,20 @@ class UserCompanyRole
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'userRoles')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/users/1'
+        ]
+    )]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: 'userRoles')]
     #[ORM\JoinColumn(nullable: false)]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/companies/1'
+        ]
+    )]
     private ?Company $company = null;
 
     #[ORM\Column(length: 50)]

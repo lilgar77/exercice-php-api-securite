@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(
             normalizationContext: ['groups' => ['company:read']],
-            security: 'is_granted("ROLE_USER")'
+            security: 'is_granted("ROLE_ADMIN")'
         ),
         new Post(
             denormalizationContext: ['groups' => ['company:write']],
@@ -29,6 +29,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
             security: 'is_granted("ROLE_ADMIN")'
         ),
         new Delete(
+            denormalizationContext: ['groups' => ['company:write']],
             security: 'is_granted("ROLE_ADMIN")'
         ),
     ],
@@ -45,12 +46,15 @@ class Company
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['company:write'])]
     private ?string $siret = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['company:write'])]
     private ?string $address = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['company:write'])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'company', targetEntity: UserCompanyRole::class, orphanRemoval: true)]

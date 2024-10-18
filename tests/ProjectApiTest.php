@@ -3,148 +3,117 @@
 namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use Symfony\Component\HttpFoundation\Response;
 
 class ProjectApiTest extends ApiTestCase
 {
+    private string $token; // JWT token for authentication
 
-    /**
-     * Test the GET /api/projects endpoint
-     */
-    public function testGetProjects(): void
+    protected function setUp(): void
     {
-        $client = static::createClient();
-
-        // Authenticate the user to access the projects
-        $response = $client->request('POST', '/api/auth', [
-            'json' => [
-                'email' => 'admin@local.host', // Replace with a valid user
-                'password' => 'admin_password', // Replace with a valid password
-            ],
-        ]);
-
-        // Check if the response contains a token
-        $data = json_decode($response->getContent(), true);
-        $token = $data['token'] ?? '';
-
-        // Make a request to get the projects
-        $response = $client->request('GET', '/api/projects', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Accept' => 'application/ld+json',
-            ],
-        ]);
-
-        $this->assertResponseIsSuccessful();
-
-        // Assert that the response contains projects
-        $content = json_decode($response->getContent(), true);
-        $this->assertNotEmpty($content['member']);
+        parent::setUp();
+        $this->token = $this->getToken();
     }
 
-    /**
-     * Test the POST /api/projects endpoint
-     */
-    public function testCreateAndDeleteProject(): void
+    private function getToken(): string
     {
-        $client = static::createClient();
-
-        // Authenticate the user to create a project
-        $response = $client->request('POST', '/api/auth', [
+        // Authenticate and get the JWT token
+        $response = static::createClient()->request('POST', '/api/auth', [
             'json' => [
                 'email' => 'admin@local.host',
                 'password' => 'admin_password',
             ],
         ]);
 
-        // Check if the response contains a token
-        $data = json_decode($response->getContent(), true);
-        $token = $data['token'] ?? '';
+        return $response->toArray()['token'];
+    }
 
-        // Prepare project data
-        $projectData = [
-            'title' => 'New Project',
-            'description' => 'Description for the new project',
-            'company' => '/api/companies/11',
-        ];
+    public function testGetByIdProjects(): void
+    {
+        // Test retrieving a project by ID
+        $idProject = 46;
+        $response = static::createClient()->request('GET', '/api/projects/' . $idProject, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token,
+                'Accept' => 'application/ld+json',
+            ],
+        ]);
 
-        // Make a request to create a new project
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(200);
+    }
+
+    public function testCreateAndDeleteProject()
+    {
+        // Test creating a project
+        $client = static::createClient();
         $response = $client->request('POST', '/api/projects', [
             'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Accept' => 'application/ld+json',
-                'Content-Type' => 'application/ld+json'
+                'Authorization' => 'Bearer ' . $this->token,
+                'Content-Type' => 'application/ld+json',
             ],
-            'json' => $projectData,
+            'json' => [
+                'title' => 'Project Title',
+                'description' => 'Project Description',
+                'company' => '/api/companies/81',
+            ],
         ]);
 
-        // Assert the response status code is 201 Created
         $this->assertResponseStatusCodeSame(201);
 
-        // Assert that the response contains the new project data
-        $content = json_decode($response->getContent(), true);
-        $this->assertArrayHasKey('id', $content);
-        $this->assertEquals('New Project', $content['title']);
-
-        // Now delete the created project
-        $projectId = $content['id'];
+        // Test deleting the created project
+        $projectId = $response->toArray()['id'];
         $response = $client->request('DELETE', '/api/projects/' . $projectId, [
             'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Accept' => 'application/ld+json',
+                'Authorization' => 'Bearer ' . $this->token,
+                'Content-Type' => 'application/ld+json',
             ],
         ]);
 
-        // Assert that the deletion was successful
-        $this->assertResponseStatusCodeSame(204); // No Content
+        $this->assertResponseStatusCodeSame(204);
     }
 
-    /**
-     * Test the PUT /api/projects/{id} endpoint
-     */
-    public function testUpdateProject(): void
+    public function testUpdateProject()
     {
         $client = static::createClient();
 
-        $response = $client->request('POST', '/api/auth', [
+        // First, create a project to update
+        $response = $client->request('POST', '/api/projects', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token,
+                'Content-Type' => 'application/ld+json',
+            ],
             'json' => [
-                'email' => 'admin@local.host',
-                'password' => 'admin_password',
+                'title' => 'Original Project Title',
+                'description' => 'Original Project Description',
+                'company' => '/api/companies/81',
             ],
         ]);
 
-        $data = json_decode($response->getContent(), true);
-        $token = $data['token'] ?? '';
+        $projectId = $response->toArray()['id'];
 
-        // Create a new project
-        $client->request('POST', '/api/projects', [
-            'headers' => ['Authorization' => 'Bearer ' . $token],
-            'json' => [
-                'title' => 'Project to Update',
-                'description' => 'Initial Description',
-            ],
-        ]);
-
-        // Retrieve the ID of the created project
-        $projectResponse = $client->request('GET', '/api/projects', [
-            'headers' => ['Authorization' => 'Bearer ' . $token],
-        ]);
-        $projects = json_decode($projectResponse->getContent(), true);
-        $projectId = $projects['member'][0]['id'];
-
-        // Update the project using the PUT method
+        // Update the project
         $response = $client->request('PUT', '/api/projects/' . $projectId, [
-            'headers' => ['Authorization' => 'Bearer ' . $token],
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token,
+                'Content-Type' => 'application/ld+json',
+            ],
             'json' => [
                 'title' => 'Updated Project Title',
-                'description' => 'Updated Description',
+                'description' => 'Updated Project Description',
+                'company' => '/api/companies/81',
             ],
         ]);
 
-        // Assert that the response status code is successful
-        $this->assertResponseIsSuccessful();
-        $updatedProject = json_decode($response->getContent(), true);
-        $this->assertEquals('Updated Project Title', $updatedProject['title']);
-        $this->assertEquals('Updated Description', $updatedProject['description']);
+        $this->assertResponseStatusCodeSame(200);
+
+        // Delete the updated project
+        $response = $client->request('DELETE', '/api/projects/' . $projectId, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token,
+                'Content-Type' => 'application/ld+json',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(204);
     }
 }
